@@ -11,7 +11,9 @@ intellectual honesty and without self-serving framing, exactly which findings
 are true, how they were verified against the actual repository state, and
 where the assessment's *details* are imprecise — because a rigorous
 acknowledgment must neither inflate nor deflate the truth. Every claim below
-was re-checked against the committed tree, not against memory.
+was re-checked against the committed tree, not against memory, and the
+privacy-model findings were cross-checked against the actual prize spec
+(`logos-co/lambda-prize`, `prizes/LP-0003.md`).
 
 ---
 
@@ -42,7 +44,7 @@ Each row was re-verified in the committed tree (commit `f3ea0ff`).
 | P0 | No CU / proof-gen benchmarks | Confirmed. No `criterion`, `#[bench]`, or `benches/` anywhere. No compute-unit numbers. |
 | P0 | Demo defaults to `RISC0_DEV_MODE=1` | Confirmed. `scripts/demo.sh:28`: `export RISC0_DEV_MODE="${RISC0_DEV_MODE:-1}"`. The demo therefore produces *mock* receipts by default, not real succinct proofs. |
 | P1 | No formal threat model | Confirmed. `docs/design.md` §7 ("Security model / assumptions") is a short bullet list, not a formal threat model: no adversary definitions, no capability assumptions, no success criteria. |
-| P1 | Distributor-side leakage not addressed | Confirmed. `design.md` §7 states the enrollment files are "held by the distributor and the recipients" and that the distributor "mints to the committed set", but never analyzes that the distributor can link every `D_i` to a recipient and observe every claim. This is the largest privacy blind spot and it is unstated. |
+| P1 | Distributor-side leakage not documented | Confirmed as a *documentation* gap, **not** a privacy-model violation. The prize (LP-0003) scopes claim privacy to **on-chain observers** ("an on-chain observer cannot link a completed claim to any specific address in the eligibility set") and explicitly treats distributor knowledge as a legitimate trade-off axis ("trade-offs between distributor knowledge, claim-time privacy, and verifiability... no single correct answer"). It requires the submission to document "what the distributor learns." `design.md` §7 states the enrollment files are "held by the distributor and the recipients" but never states the distributor's full view (it can link every `D_i` to a recipient and observe each claim). This is a required-documentation omission, not a design disqualifier. |
 | P1 | "Unlinkable" never defined | Confirmed. The string "unlink" (case-insensitive) does not appear in `docs/design.md`, `docs/verification.md`, or `README.md`. No formal definition exists. |
 | P1 | No deterministic error codes | Confirmed. `methods/guest/src/handlers.rs` uses `assert!` with human strings (e.g. `:52` "Distributor must sign", `:53`, `:57`, `:58`, `:92`, `:100`) and `.expect()` (`:20,:22,:28`). There is **no** error enum in the guest. The requirement for "deterministic, documented error codes" is unmet. |
 | P2 | No ZK eligibility proof | Confirmed, and acknowledged as deliberate. `docs/design.md` §2 explicitly defers eligibility to "the distributor minting only enrolled recipients" and lists merkle-proof verification in the guest as out of scope (§8). The Merkle tree is used only off-chain (`airdrop_status`), never inside a proof. The review's "architectural gap" characterization is accurate. |
@@ -65,17 +67,34 @@ stated precisely rather than as flat admissions.
   gap, but the fix is either (a) a membership-proof instruction in the guest,
   or (b) a much more rigorous written justification — not a coding slip.
 
-- **"The distributor can link claims."** True, and it is the most damaging
-  privacy finding. It is also fundamental to the current design: the
-  distributor authors the enrollment files and the mints, so it holds the
-  `D_i`↔recipient mapping by construction. No remediation can be "document it
-  away"; the design itself vests this trust in the distributor. The write-up
-  must state this as an explicit trust assumption, or the design must change.
+- **"The distributor can link claims."** True as a factual matter, and the
+  acknowledgment's original framing overstated it. The distributor authors the
+  enrollment files and the mints, so it holds the `D_i`↔recipient mapping and
+  can observe every claim. **However**, LP-0003 does *not* require the
+  distributor to be blind — the prize's stated privacy property is that an
+  **on-chain observer** cannot link a claim to an eligible address (which this
+  design does provide: no enrollment data or `D_i`↔recipient mapping ever
+  appears on-chain, and claims are shielded transfers), and the prize
+  explicitly names distributor knowledge as one axis in a legitimate
+  trade-off space. The genuine failure is that this distributor-side view is
+  **not documented**, when the prize explicitly requires documenting "what the
+  distributor learns." The fix is a written threat model stating the
+  distributor trust assumption precisely — not a redesign, and not "documenting
+  it away" (that phrasing in the original draft was wrong: documenting a
+  required fact is not dodging it).
 
 - **"Failed claims do not mark claimant as claimed."** The review marks this
   Pass, and the verification agrees (a rejected transfer publishes no
   nullifier and writes no state). This one is a genuine strength, not a
   failure.
+
+- **"The distributor can link claims" framed as the most damaging privacy
+  finding / a reason the design must change.** Overstated by both the review
+  and the first draft of this document. The prize's privacy requirement is
+  explicitly about *on-chain observers*; distributor knowledge is named by the
+  prize as a legitimate trade-off axis. The design satisfies the observer
+  requirement; it merely owes the prize a documented statement of the
+  distributor's view (which it does not currently have).
 
 ---
 
