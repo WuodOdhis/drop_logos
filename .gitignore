@@ -1,0 +1,6 @@
+**/target/
+/.logos-airdrop/
+**/storage.json
+**/wallet_config.json
+.DS_Store
+target/

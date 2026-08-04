@@ -1,0 +1,164 @@
+{
+  "accounts": [
+    {
+      "name": "DistributionState",
+      "type": {
+        "fields": [
+          {
+            "name": "root",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "token_definition",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "total_allocation",
+            "type": "u128"
+          },
+          {
+            "name": "num_eligible",
+            "type": "u64"
+          },
+          {
+            "name": "distributor",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "committed_at",
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "type": "u64"
+          }
+        ],
+        "kind": "struct"
+      }
+    }
+  ],
+  "errors": [],
+  "instruction_type": "airdrop_core::Instruction",
+  "instructions": [
+    {
+      "accounts": [
+        {
+          "init": true,
+          "name": "distribution",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": "distribution"
+              },
+              {
+                "kind": "arg",
+                "path": "distribution_id"
+              }
+            ]
+          },
+          "signer": false,
+          "writable": true
+        },
+        {
+          "init": false,
+          "name": "distributor",
+          "signer": true,
+          "writable": false
+        },
+        {
+          "init": false,
+          "name": "clock_account",
+          "signer": false,
+          "writable": false
+        }
+      ],
+      "args": [
+        {
+          "name": "distribution_id",
+          "type": "u64"
+        },
+        {
+          "name": "root",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "token_definition",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "total_allocation",
+          "type": "u128"
+        },
+        {
+          "name": "num_eligible",
+          "type": "u64"
+        }
+      ],
+      "name": "initialize_distribution"
+    },
+    {
+      "accounts": [
+        {
+          "init": false,
+          "name": "distribution",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": "distribution"
+              },
+              {
+                "kind": "arg",
+                "path": "distribution_id"
+              }
+            ]
+          },
+          "signer": false,
+          "writable": false
+        },
+        {
+          "init": false,
+          "name": "distributor",
+          "signer": true,
+          "writable": false
+        }
+      ],
+      "args": [
+        {
+          "name": "distribution_id",
+          "type": "u64"
+        }
+      ],
+      "name": "freeze_distribution"
+    }
+  ],
+  "name": "airdrop_program",
+  "types": [],
+  "version": "0.1.0"
+}
