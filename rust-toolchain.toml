@@ -1,0 +1,11 @@
+# Host toolchain for the airdrop workspace. Must be kept in sync with the
+# sequencer's rust-toolchain.toml (logos-lez-rln pins 1.94.0) so host crates
+# and SPEL-generated code build identically.
+#
+# The risc0 guest has its own toolchain (r0.1.88.0, see verification.md) and
+# is built with `risczero build`, not with this toolchain.
+
+[toolchain]
+channel = "1.94.0"
+profile = "default"
+components = ["clippy", "rustfmt"]
