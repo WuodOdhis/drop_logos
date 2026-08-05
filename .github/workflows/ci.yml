@@ -23,8 +23,6 @@ jobs:
           components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "." -> target
 
       - name: cargo fmt
         run: cargo fmt --all -- --check
@@ -51,8 +49,6 @@ jobs:
           components: clippy
 
       - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "." -> target
 
       - name: Clippy host crates
         run: cargo clippy --manifest-path Cargo.toml --all-targets --no-deps -- -D warnings
@@ -73,8 +69,6 @@ jobs:
           components: rustfmt
 
       - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "." -> target
 
       - name: Build all host bins
         run: cargo build --manifest-path Cargo.toml --bins --all-targets
