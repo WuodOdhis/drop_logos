@@ -23,7 +23,5 @@ pub enum Instruction {
     /// Distributor freezes the distribution (no further funding).
     ///
     /// Accounts: `[distribution]` (mut PDA), `[distributor]` (signer).
-    FreezeDistribution {
-        distribution_id: u64,
-    },
+    FreezeDistribution { distribution_id: u64 },
 }

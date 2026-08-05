@@ -102,8 +102,14 @@ pub fn hash_single(input: &[u8; 32]) -> [u8; 32] {
 pub fn hash_pair(left: &[u8; 32], right: &[u8; 32]) -> [u8; 32] {
     let l = Felt::unsafe_from_le_bytes(left);
     let r = Felt::unsafe_from_le_bytes(right);
-    assert!(Felt::is_valid(&l), "left input is not a valid BN254 field element");
-    assert!(Felt::is_valid(&r), "right input is not a valid BN254 field element");
+    assert!(
+        Felt::is_valid(&l),
+        "left input is not a valid BN254 field element"
+    );
+    assert!(
+        Felt::is_valid(&r),
+        "right input is not a valid BN254 field element"
+    );
     let out = compress_2([l, r]);
     Felt::to_le_bytes(&out)
 }
@@ -173,7 +179,12 @@ impl SparseMerkleTree {
     }
 
     /// Hash of the node at `(level, index)`, derived from the stored leaves.
-    fn node_hash(&self, level: usize, index: u64, memo: &mut BTreeMap<(usize, u64), [u8; 32]>) -> [u8; 32] {
+    fn node_hash(
+        &self,
+        level: usize,
+        index: u64,
+        memo: &mut BTreeMap<(usize, u64), [u8; 32]>,
+    ) -> [u8; 32] {
         if let Some(h) = memo.get(&(level, index)) {
             return *h;
         }
@@ -231,7 +242,12 @@ impl SparseMerkleTree {
     /// Verify an inclusion proof: `(path, index)` for `leaf` against `root`.
     ///
     /// Returns `true` iff the computed root matches `root`.
-    pub fn verify_inclusion(root: &[u8; 32], leaf: &[u8; 32], path: &[[u8; 32]], index: u64) -> bool {
+    pub fn verify_inclusion(
+        root: &[u8; 32],
+        leaf: &[u8; 32],
+        path: &[[u8; 32]],
+        index: u64,
+    ) -> bool {
         let mut hash = *leaf;
         let mut idx = index;
         for sibling in path {
@@ -273,7 +289,12 @@ mod tests {
         let tree = SparseMerkleTree::new(8);
         let path = tree.path(0);
         assert_eq!(path[0], ZERO);
-        assert!(SparseMerkleTree::verify_inclusion(&tree.root(), &ZERO, &path, 0));
+        assert!(SparseMerkleTree::verify_inclusion(
+            &tree.root(),
+            &ZERO,
+            &path,
+            0
+        ));
     }
 
     #[test]
@@ -294,7 +315,9 @@ mod tests {
         let root = tree.root();
         for (i, l) in leaves.iter().enumerate() {
             let path = tree.path(i as u64);
-            assert!(SparseMerkleTree::verify_inclusion(&root, l, &path, i as u64));
+            assert!(SparseMerkleTree::verify_inclusion(
+                &root, l, &path, i as u64
+            ));
         }
     }
 
@@ -304,7 +327,12 @@ mod tests {
         tree.insert(0, test_leaf(1));
         let root = tree.root();
         let path = tree.path(0);
-        assert!(!SparseMerkleTree::verify_inclusion(&root, &test_leaf(2), &path, 0));
+        assert!(!SparseMerkleTree::verify_inclusion(
+            &root,
+            &test_leaf(2),
+            &path,
+            0
+        ));
     }
 
     #[test]

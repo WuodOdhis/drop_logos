@@ -73,7 +73,10 @@ mod tests {
     #[test]
     fn u64_seed_le() {
         let seed = u64_seed(0x0102_0304_0506_0708);
-        assert_eq!(&seed[..8], &[0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01]);
+        assert_eq!(
+            &seed[..8],
+            &[0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01]
+        );
         assert_eq!(&seed[8..], &[0u8; 24]);
     }
 
