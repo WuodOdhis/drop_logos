@@ -85,7 +85,7 @@ pub mod airdrop_program {
         total_allocation: u128,
         num_eligible: u64,
     ) -> SpelResult {
-        Ok(handlers::initialize_distribution(
+        handlers::initialize_distribution(
             distribution,
             distributor,
             clock_account,
@@ -94,7 +94,7 @@ pub mod airdrop_program {
             token_definition,
             total_allocation,
             num_eligible,
-        ))
+        )
     }
 
     #[instruction]
@@ -105,10 +105,6 @@ pub mod airdrop_program {
         distributor: AccountWithMetadata,
         distribution_id: u64,
     ) -> SpelResult {
-        Ok(handlers::freeze_distribution(
-            distribution,
-            distributor,
-            distribution_id,
-        ))
+        handlers::freeze_distribution(distribution, distributor, distribution_id)
     }
 }
