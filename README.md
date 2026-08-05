@@ -84,8 +84,9 @@ flow and the on-chain/off-chain data exchanged at each step.
 # host integration tests (merkle tree, PDA, serde) — no zkVM
 RUSTC_BOOTSTRAP=1 cargo test --manifest-path Cargo.toml --test airdrop_integration
 
-# guest unit tests
-cargo test --manifest-path methods/guest/Cargo.toml
+# guest host-side unit tests (also need RUSTC_BOOTSTRAP=1 for the pinned
+# rust-poseidon-bn254-pure hash crate)
+RUSTC_BOOTSTRAP=1 cargo test --manifest-path methods/guest/Cargo.toml
 ```
 
 ## IDL

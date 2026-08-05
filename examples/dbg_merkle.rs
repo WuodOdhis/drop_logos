@@ -14,5 +14,5 @@ fn main() {
         h = hash_pair(&h, sib);
         println!("fold {}: {:?}", i, h);
     }
-    println!("folded: {:?} eq defaults[0]: {}", h == d[0], h);
+    println!("folded: {:?} eq defaults[0]: {}", h == d[0], hex::encode(h));
 }

@@ -5,9 +5,9 @@
 //! cargo run --bin airdrop_status
 //! ```
 
-use airdrop::airdrop::{ENROLL_DIR, MANIFEST_PATH, hex32, init_wallet, load_program};
 use airdrop::airdrop::client::read_distribution;
 use airdrop::airdrop::types::{Enrollment, RunManifest};
+use airdrop::airdrop::{ENROLL_DIR, MANIFEST_PATH, hex32, init_wallet, load_program};
 
 #[tokio::main]
 async fn main() {

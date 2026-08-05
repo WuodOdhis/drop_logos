@@ -32,7 +32,10 @@ impl DistributionState {
 // Compile-time drift guard: local `#[account_type]` struct must match the shared
 // `airdrop_core::DistributionState` byte-for-byte.
 const _: () = {
-    assert!(core::mem::size_of::<DistributionState>() == core::mem::size_of::<SharedDistributionState>());
+    assert!(
+        core::mem::size_of::<DistributionState>()
+            == core::mem::size_of::<SharedDistributionState>()
+    );
 };
 
 #[cfg(test)]
@@ -73,11 +76,11 @@ pub mod airdrop_program {
     use super::*;
 
     #[instruction]
+    #[allow(clippy::too_many_arguments)] // SPEL-generated signature mirrors the on-chain tx inputs
     pub fn initialize_distribution(
         #[account(init, pda = [literal("distribution"), arg("distribution_id")])]
         distribution: AccountWithMetadata,
-        #[account(signer)]
-        distributor: AccountWithMetadata,
+        #[account(signer)] distributor: AccountWithMetadata,
         clock_account: AccountWithMetadata,
         distribution_id: u64,
         root: [u8; 32],
@@ -101,8 +104,7 @@ pub mod airdrop_program {
     pub fn freeze_distribution(
         #[account(pda = [literal("distribution"), arg("distribution_id")])]
         distribution: AccountWithMetadata,
-        #[account(signer)]
-        distributor: AccountWithMetadata,
+        #[account(signer)] distributor: AccountWithMetadata,
         distribution_id: u64,
     ) -> SpelResult {
         handlers::freeze_distribution(distribution, distributor, distribution_id)

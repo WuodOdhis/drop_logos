@@ -79,6 +79,7 @@ fn require_clock(clock_account: &AccountWithMetadata) -> Result<u64, SpelError> 
 }
 
 /// Distributor commits to the hidden eligibility set.
+#[allow(clippy::too_many_arguments)] // flat config record for an on-chain tx; all args are tx inputs
 pub fn initialize_distribution(
     mut distribution: AccountWithMetadata,
     distributor: AccountWithMetadata,

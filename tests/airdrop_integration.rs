@@ -34,7 +34,9 @@ fn eligibility_root_and_path_verify() {
 
     for (i, l) in leaves.iter().enumerate() {
         let path = tree.path(i as u64);
-        assert!(SparseMerkleTree::verify_inclusion(&root, l, &path, i as u64));
+        assert!(SparseMerkleTree::verify_inclusion(
+            &root, l, &path, i as u64
+        ));
     }
 }
 
@@ -64,7 +66,8 @@ fn distribution_pda_matches_guest_seed() {
     hasher.update(label);
     hasher.update(u64seed);
     let combined: [u8; 32] = hasher.finalize().into();
-    let manual = AccountId::for_public_pda(&program_id, &nssa_core::program::PdaSeed::new(combined));
+    let manual =
+        AccountId::for_public_pda(&program_id, &nssa_core::program::PdaSeed::new(combined));
     assert_eq!(id, manual);
 }
 

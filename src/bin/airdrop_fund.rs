@@ -6,13 +6,11 @@
 //! cargo run --bin airdrop_fund
 //! ```
 
-use airdrop::airdrop::{
-    ENROLL_DIR, MANIFEST_PATH, init_wallet, load_program,
-};
 use airdrop::airdrop::types::{Enrollment, RunManifest};
+use airdrop::airdrop::{ENROLL_DIR, MANIFEST_PATH, init_wallet, load_program};
 use nssa::AccountId;
-use nssa_core::encryption::ViewingPublicKey;
 use nssa_core::NullifierPublicKey;
+use nssa_core::encryption::ViewingPublicKey;
 use wallet::program_facades::token::Token;
 
 fn read_enrollments() -> Vec<Enrollment> {
@@ -37,7 +35,10 @@ async fn main() {
     let _program = load_program();
     let manifest = RunManifest::from_file(MANIFEST_PATH);
     let enrollments = read_enrollments();
-    assert!(!enrollments.is_empty(), "No enrollments found in {ENROLL_DIR}");
+    assert!(
+        !enrollments.is_empty(),
+        "No enrollments found in {ENROLL_DIR}"
+    );
 
     let definition_id = AccountId::new(airdrop::airdrop::client::parse_hex32(
         &manifest.token_definition,
@@ -52,7 +53,7 @@ async fn main() {
     // The token definition created in `airdrop_deploy` may not be decrypted
     // into the key chain yet (block-seal race); wait until it holds valid data.
     let definition_ok = |w: &wallet::WalletCore| -> bool {
-        w.get_account_private(definition_id.clone())
+        w.get_account_private(definition_id)
             .and_then(|acc| token_core::TokenDefinition::try_from(&acc.data).ok())
             .is_some()
     };
@@ -78,7 +79,7 @@ async fn main() {
     // the sequencer rejects the duplicate definition commitment as
     // "Commitment already seen".
     let total_supply = |w: &wallet::WalletCore| -> u128 {
-        w.get_account_private(definition_id.clone())
+        w.get_account_private(definition_id)
             .and_then(|acc| token_core::TokenDefinition::try_from(&acc.data).ok())
             .and_then(|def| match def {
                 token_core::TokenDefinition::Fungible { total_supply, .. } => Some(total_supply),
@@ -101,7 +102,7 @@ async fn main() {
         );
         Token(&wallet_core)
             .send_mint_transaction_private_foreign_account(
-                definition_id.clone(),
+                definition_id,
                 npk,
                 vpk,
                 enroll.identifier,

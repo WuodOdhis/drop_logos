@@ -6,11 +6,12 @@
 //! cargo run --bin airdrop_claim -- --name alice
 //! ```
 
-use airdrop::airdrop::{
-    ENROLL_DIR, MANIFEST_PATH, init_wallet, load_program,
-    client::{read_distribution, wait_account_attempts},
-};
 use airdrop::airdrop::types::{Enrollment, RunManifest};
+use airdrop::airdrop::{
+    ENROLL_DIR, MANIFEST_PATH,
+    client::{read_distribution, wait_account_attempts},
+    init_wallet, load_program,
+};
 use nssa::AccountId;
 use std::time::Duration;
 use token_core::TokenHolding;
@@ -32,10 +33,10 @@ fn parse_args() -> String {
 /// decrypted key-chain state (after sync). Returns `None` if the account is
 /// not in the key chain yet or does not hold token data yet.
 fn private_token_balance(wallet_core: &wallet::WalletCore, account_id: &AccountId) -> Option<u128> {
-    let account = wallet_core.get_account_private(account_id.clone())?;
+    let account = wallet_core.get_account_private(*account_id)?;
     match TokenHolding::try_from(&account.data).ok()? {
         TokenHolding::Fungible { balance, .. } => Some(balance),
-        _ => None,
+        TokenHolding::NftMaster { .. } | TokenHolding::NftPrintedCopy { .. } => None,
     }
 }
 
@@ -83,7 +84,10 @@ async fn main() {
         d_balance = private_token_balance(&wallet_core, &d_account_id);
     }
     let d_balance = d_balance.expect("D_i should hold a token balance after funding");
-    println!("D_i {} balance before claim: {d_balance}", enrollment.d_account_id);
+    println!(
+        "D_i {} balance before claim: {d_balance}",
+        enrollment.d_account_id
+    );
     assert_eq!(
         d_balance, enrollment.amount,
         "D_i balance does not match the allocation; was it funded?"
@@ -96,8 +100,8 @@ async fn main() {
     );
     let (hash, _secrets) = Token(&wallet_core)
         .send_transfer_transaction_private_owned_account(
-            d_account_id.clone(),
-            main_account_id.clone(),
+            d_account_id,
+            main_account_id,
             enrollment.amount,
         )
         .await
@@ -127,20 +131,12 @@ async fn main() {
         "  main shielded account balance after claim: {}",
         main_balance.unwrap_or(0)
     );
-    assert_eq!(
-        main_balance,
-        Some(enrollment.amount),
-        "Claim did not land"
-    );
+    assert_eq!(main_balance, Some(enrollment.amount), "Claim did not land");
 
     // ---- Double-claim must fail: D_i's nullifier is already spent. ----
     println!("Attempting a second claim (must fail)...");
     let double_claim = Token(&wallet_core)
-        .send_transfer_transaction_private_owned_account(
-            d_account_id.clone(),
-            main_account_id.clone(),
-            1,
-        )
+        .send_transfer_transaction_private_owned_account(d_account_id, main_account_id, 1)
         .await;
     match double_claim {
         Ok(_) => panic!("Double claim unexpectedly succeeded"),

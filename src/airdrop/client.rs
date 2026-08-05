@@ -9,10 +9,7 @@ use nssa::{
     program_deployment_transaction,
     public_transaction::{Message, WitnessSet},
 };
-use nssa_core::{
-    program::ProgramId,
-    PrivateAccountKind,
-};
+use nssa_core::{PrivateAccountKind, program::ProgramId};
 use sequencer_service_rpc::RpcClient as _;
 use wallet::WalletCore;
 
@@ -23,8 +20,7 @@ use crate::airdrop::pda::distribution_account_id;
 /// artifact (`methods/guest/target/.../docker/airdrop.bin`) is only produced by
 /// `cargo risczero build`, which needs Docker BuildKit (buildx); the local build
 /// output below is used instead.
-pub const AIRDROP_BINARY: &str =
-    "methods/target/riscv-guest/airdrop_methods/airdrop_guest/riscv32im-risc0-zkvm-elf/release/airdrop.bin";
+pub const AIRDROP_BINARY: &str = "methods/target/riscv-guest/airdrop_methods/airdrop_guest/riscv32im-risc0-zkvm-elf/release/airdrop.bin";
 /// Local state dir (relative to `airdrop/` when running the bins).
 pub const DATA_DIR: &str = ".logos-airdrop";
 /// Where `airdrop_enroll` writes recipient files.
@@ -92,7 +88,7 @@ pub async fn wait_for_account_data(
 ) {
     for _ in 0..max_attempts {
         let account = wallet_core
-            .get_account_public(account_id.clone())
+            .get_account_public(*account_id)
             .await
             .expect("Failed to fetch account");
         if !account.data.as_ref().is_empty() {
@@ -112,7 +108,11 @@ pub fn distribution_account(program: &Program, distribution_id: u64) -> AccountI
 }
 
 /// True if `program`'s `distribution_id` PDA already has on-chain data.
-pub async fn is_initialized(wallet_core: &WalletCore, program: &Program, distribution_id: u64) -> bool {
+pub async fn is_initialized(
+    wallet_core: &WalletCore,
+    program: &Program,
+    distribution_id: u64,
+) -> bool {
     let id = distribution_account(program, distribution_id);
     let account = wallet_core
         .get_account_public(id)
@@ -126,13 +126,18 @@ async fn is_program_deployed(
     program: &Program,
     account_id: &AccountId,
 ) -> bool {
-    match wallet_core.get_account_public(account_id.clone()).await {
+    match wallet_core.get_account_public(*account_id).await {
         Ok(account) => account.program_owner == program.id(),
         Err(_) => false,
     }
 }
 
-async fn send_deploy_tx(wallet_core: &WalletCore, program: &Program, program_name: &str, bytecode: Vec<u8>) {
+async fn send_deploy_tx(
+    wallet_core: &WalletCore,
+    program: &Program,
+    program_name: &str,
+    bytecode: Vec<u8>,
+) {
     let deploy_msg = program_deployment_transaction::Message::new(bytecode);
     let deploy_tx = ProgramDeploymentTransaction::new(deploy_msg);
 
@@ -206,12 +211,17 @@ pub async fn ensure_program_deployed(
 }
 
 /// Deploy a builtin program (token / authenticated_transfer) idempotently.
-pub async fn deploy_builtin_program(wallet_core: &WalletCore, program: &Program, program_name: &str) {
+pub async fn deploy_builtin_program(
+    wallet_core: &WalletCore,
+    program: &Program,
+    program_name: &str,
+) {
     send_deploy_tx(wallet_core, program, program_name, program.elf().to_vec()).await;
 }
 
 /// `initialize_distribution` public transaction: commits the eligibility root.
 /// `distributor` must be a wallet-owned public account (it signs).
+#[allow(clippy::too_many_arguments)] // flat config record for a tx builder; fields are all on-chain inputs
 pub async fn initialize_distribution(
     wallet_core: &WalletCore,
     program: &Program,
@@ -223,17 +233,13 @@ pub async fn initialize_distribution(
     num_eligible: u64,
 ) -> AccountId {
     let distribution = distribution_account(program, distribution_id);
-    let accounts = vec![
-        distribution.clone(),
-        distributor.clone(),
-        clock_account_id(),
-    ];
+    let accounts = vec![distribution, *distributor, clock_account_id()];
 
     let signing_key = wallet_core
-        .get_account_public_signing_key(distributor.clone())
+        .get_account_public_signing_key(*distributor)
         .expect("Distributor account not found in wallet");
     let nonces = wallet_core
-        .get_accounts_nonces(vec![distributor.clone()])
+        .get_accounts_nonces(vec![*distributor])
         .await
         .expect("Failed to fetch distributor nonce");
 
@@ -270,13 +276,13 @@ pub async fn freeze_distribution(
     distributor: &AccountId,
 ) {
     let distribution = distribution_account(program, distribution_id);
-    let accounts = vec![distribution.clone(), distributor.clone(), clock_account_id()];
+    let accounts = vec![distribution, *distributor, clock_account_id()];
 
     let signing_key = wallet_core
-        .get_account_public_signing_key(distributor.clone())
+        .get_account_public_signing_key(*distributor)
         .expect("Distributor account not found in wallet");
     let nonces = wallet_core
-        .get_accounts_nonces(vec![distributor.clone()])
+        .get_accounts_nonces(vec![*distributor])
         .await
         .expect("Failed to fetch distributor nonce");
 
@@ -324,9 +330,9 @@ pub fn hex32(bytes: &[u8; 32]) -> String {
 /// Parse a hex string into `[u8; 32]`.
 pub fn parse_hex32(s: &str, what: &str) -> [u8; 32] {
     let bytes = hex::decode(s).unwrap_or_else(|e| panic!("{what} is not valid hex: {e}"));
-    bytes.try_into().unwrap_or_else(|v: Vec<u8>| {
-        panic!("{what} must decode to 32 bytes, got {}", v.len())
-    })
+    bytes
+        .try_into()
+        .unwrap_or_else(|v: Vec<u8>| panic!("{what} must decode to 32 bytes, got {}", v.len()))
 }
 
 /// Extract the numeric identifier for a private account in the wallet key chain.
@@ -338,7 +344,7 @@ pub fn private_account_identifier(wallet_core: &WalletCore, account_id: &Account
     let acc = wallet_core
         .storage()
         .key_chain()
-        .private_account(account_id.clone())
+        .private_account(*account_id)
         .expect("Private account not found in wallet");
     match acc.kind {
         PrivateAccountKind::Regular(identifier) => *identifier,

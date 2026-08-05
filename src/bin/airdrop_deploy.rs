@@ -6,12 +6,14 @@
 //! cargo run --bin airdrop_deploy
 //! ```
 
+use airdrop::airdrop::client::{
+    deploy_builtin_program, ensure_program_deployed, wait_for_block_seal,
+};
+use airdrop::airdrop::types::{Enrollment, RunManifest};
 use airdrop::airdrop::{
-    AIRDROP_BINARY, DATA_DIR, ENROLL_DIR, MANIFEST_PATH, hex32, hex_account, hex_program_id,
+    AIRDROP_BINARY, DATA_DIR, ENROLL_DIR, MANIFEST_PATH, hex_account, hex_program_id, hex32,
     init_wallet, load_program,
 };
-use airdrop::airdrop::client::{deploy_builtin_program, ensure_program_deployed, wait_for_block_seal};
-use airdrop::airdrop::types::{Enrollment, RunManifest};
 use wallet::program_facades::token::Token;
 
 #[tokio::main]
@@ -36,13 +38,14 @@ async fn main() {
             enrollments.push(Enrollment::from_file(path.to_str().unwrap()));
         }
     }
-    assert!(!enrollments.is_empty(), "No enrollments found in {ENROLL_DIR}");
+    assert!(
+        !enrollments.is_empty(),
+        "No enrollments found in {ENROLL_DIR}"
+    );
 
     let num_eligible = enrollments.len() as u64;
     let total_allocation: u128 = enrollments.iter().map(|e| e.amount).sum();
-    println!(
-        "Loaded {num_eligible} enrollments, total allocation {total_allocation}"
-    );
+    println!("Loaded {num_eligible} enrollments, total allocation {total_allocation}");
 
     let leaves: Vec<[u8; 32]> = enrollments
         .iter()
@@ -69,7 +72,8 @@ async fn main() {
         .expect("Failed to store wallet");
 
     // ---- 3. Deploy programs (idempotent). ----
-    let distribution_account = airdrop::airdrop::client::distribution_account(&program, distribution_id);
+    let distribution_account =
+        airdrop::airdrop::client::distribution_account(&program, distribution_id);
     ensure_program_deployed(
         &wallet_core,
         &program,
@@ -100,8 +104,8 @@ async fn main() {
 
     Token(&wallet_core)
         .send_new_definition_private_owned_definiton_and_supply(
-            definition_id.clone(),
-            supply_id.clone(),
+            definition_id,
+            supply_id,
             "Private Airdrop".to_string(),
             total_allocation,
         )

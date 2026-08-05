@@ -6,10 +6,8 @@
 //! cargo run --bin airdrop_enroll -- alice 1000000
 //! ```
 
-use airdrop::airdrop::{
-    ENROLL_DIR, hex32, hex_account, init_wallet, private_account_identifier,
-};
 use airdrop::airdrop::types::Enrollment;
+use airdrop::airdrop::{ENROLL_DIR, hex_account, hex32, init_wallet, private_account_identifier};
 
 #[tokio::main]
 async fn main() {
@@ -34,7 +32,7 @@ async fn main() {
     let acc = wallet_core
         .storage()
         .key_chain()
-        .private_account(d_account_id.clone())
+        .private_account(d_account_id)
         .expect("D_i not found in key chain");
     let npk = acc.key_chain.nullifier_public_key;
     let vpk = acc.key_chain.viewing_public_key.clone();

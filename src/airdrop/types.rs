@@ -39,9 +39,9 @@ impl Enrollment {
 
     pub fn decode_hex32(s: &str, what: &str) -> [u8; 32] {
         let bytes = hex::decode(s).unwrap_or_else(|e| panic!("{what} is not valid hex: {e}"));
-        bytes.try_into().unwrap_or_else(|v: Vec<u8>| {
-            panic!("{what} must decode to 32 bytes, got {}", v.len())
-        })
+        bytes
+            .try_into()
+            .unwrap_or_else(|v: Vec<u8>| panic!("{what} must decode to 32 bytes, got {}", v.len()))
     }
 }
 
