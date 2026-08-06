@@ -72,3 +72,40 @@ jobs:
 
       - name: Build all host bins
         run: cargo build --manifest-path Cargo.toml --bins --all-targets
+
+  integration:
+    name: sequencer integration test
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install host toolchain
+        uses: dtolnay/rust-toolchain@1.94.0
+        with:
+          components: rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install risc0 toolchain (rzup)
+        run: |
+          curl -fsSL https://risczero.com/install.sh | bash
+          "$HOME/.local/bin/rzup" install rust
+
+      - name: Build the guest ELF (local risc0 build)
+        run: cargo build --manifest-path methods/Cargo.toml
+
+      - name: Build host bins
+        run: cargo build --bins
+
+      - name: Clone + build the standalone sequencer
+        run: |
+          git clone --depth 1 --branch v0.2.0-rc6 \
+            https://github.com/logos-blockchain/logos-execution-zone.git /tmp/sequencer-src
+          cargo build --release --manifest-path /tmp/sequencer-src/lez/sequencer/service/Cargo.toml \
+            --features standalone
+
+      - name: Run the sequencer integration test
+        env:
+          LEZ_SEQUENCER_BIN: /tmp/sequencer-src/target/release/sequencer_service
+        run: RISC0_DEV_MODE=1 cargo test --test sequencer_integration -- --ignored
