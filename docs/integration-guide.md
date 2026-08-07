@@ -84,14 +84,14 @@ Read the committed root for a distribution and verify an enrollment's leaf
 against it (no wallet, no sequencer needed for verification):
 
 ```rust
-use airdrop::airdrop::client::{distribution_pda_seed, hex32, parse_hex32};
+use airdrop::airdrop::client::{parse_hex32, hex32};
 use airdrop::airdrop::types::Enrollment;
 use airdrop_core::DistributionState;
 use airdrop_core::merkle::SparseMerkleTree;
 
 /// Distribution PDA seed, guest-identical.
 fn pda_seed(distribution_id: u64) -> [u8; 32] {
-    distribution_pda_seed(distribution_id)
+    airdrop_core::distribution_pda_seed(distribution_id)
 }
 
 /// Decode a distribution account's data into `DistributionState`.

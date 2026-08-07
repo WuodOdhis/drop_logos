@@ -25,7 +25,8 @@ For the full mechanism, on-chain/off-chain data flows, and assumptions, see
 `docs/design.md`. For the formal threat model (who learns what, distributor
 trust, "unlinkable" defined relative to a stated adversary), see
 `docs/privacy-model.md`. For deterministic program error codes, see
-`docs/errors.md`.
+`docs/errors.md`. For the required FURPS self-assessment (Functionality,
+Usability, Reliability, Performance, Supportability), see `docs/furps.md`.
 
 ## Roles
 
