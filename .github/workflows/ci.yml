@@ -90,7 +90,7 @@ jobs:
       - name: Install risc0 toolchain (rzup)
         run: |
           curl -fsSL https://risczero.com/install | bash
-          "$HOME/.local/bin/rzup" install rust 1.88.0
+          "$HOME/.risc0/bin/rzup" install rust 1.88.0
 
       - name: Build the guest ELF (local risc0 build)
         run: cargo build --manifest-path methods/Cargo.toml
