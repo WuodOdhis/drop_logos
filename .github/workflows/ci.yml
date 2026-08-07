@@ -91,6 +91,7 @@ jobs:
         run: |
           curl -fsSL https://risczero.com/install | bash
           "$HOME/.risc0/bin/rzup" install rust 1.88.0
+          "$HOME/.risc0/bin/rzup" install r0vm 3.0.5
 
       - name: Build the guest ELF (local risc0 build)
         run: cargo build --manifest-path methods/Cargo.toml
