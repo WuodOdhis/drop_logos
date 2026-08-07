@@ -1,6 +1,6 @@
 # Post-Assessment Acknowledgment
 
-Status: **VERDICT ACCEPTED — DOES NOT PASS**
+Status: **VERDICT ACCEPTED, DOES NOT PASS**
 
 This document is written *after* an external review of this repository
 (`https://github.com/WuodOdhis/drop_logos`) that scored the submission at
@@ -9,7 +9,7 @@ roughly 16/48 and recommended a **DOES NOT PASS** verdict.
 The purpose of this file is not to appeal the verdict. It is to record, with
 intellectual honesty and without self-serving framing, exactly which findings
 are true, how they were verified against the actual repository state, and
-where the assessment's *details* are imprecise — because a rigorous
+where the assessment's *details* are imprecise, because a rigorous
 acknowledgment must neither inflate nor deflate the truth. Every claim below
 was re-checked against the committed tree, not against memory, and the
 privacy-model findings were cross-checked against the actual prize spec
@@ -48,9 +48,9 @@ Each row was re-verified in the committed tree (commit `f3ea0ff`).
 | P1 | "Unlinkable" never defined | Confirmed. The string "unlink" (case-insensitive) does not appear in `docs/design.md`, `docs/verification.md`, or `README.md`. No formal definition exists. |
 | P1 | No deterministic error codes | Confirmed. `methods/guest/src/handlers.rs` uses `assert!` with human strings (e.g. `:52` "Distributor must sign", `:53`, `:57`, `:58`, `:92`, `:100`) and `.expect()` (`:20,:22,:28`). There is **no** error enum in the guest. The requirement for "deterministic, documented error codes" is unmet. |
 | P2 | No ZK eligibility proof | Confirmed, and acknowledged as deliberate. `docs/design.md` §2 explicitly defers eligibility to "the distributor minting only enrolled recipients" and lists merkle-proof verification in the guest as out of scope (§8). The Merkle tree is used only off-chain (`airdrop_status`), never inside a proof. The review's "architectural gap" characterization is accurate. |
-| P2 | `rust-toolchain.toml` missing from repo | Confirmed. No `rust-toolchain*` file is committed, yet `docs/verification.md` lists the pin as "`1.94.0` (`rust-toolchain.toml`)" — the doc references a file that is not in the repo. |
+| P2 | `rust-toolchain.toml` missing from repo | Confirmed. No `rust-toolchain*` file is committed, yet `docs/verification.md` lists the pin as "`1.94.0` (`rust-toolchain.toml`)", the doc references a file that is not in the repo. |
 | P2 | Tests do not run against a sequencer | Confirmed. `tests/airdrop_integration.rs:1-6` states they "run without the zkVM or a sequencer." No sequencer-backed integration test exists. |
-| — | No GitHub issues filed | Confirmed. `gh issue list --repo WuodOdhis/drop_logos` returns zero issues. |
+|   | No GitHub issues filed | Confirmed. `gh issue list --repo WuodOdhis/drop_logos` returns zero issues. |
 
 ---
 
@@ -65,13 +65,13 @@ stated precisely rather than as flat admissions.
   membership, instead relying on LEZ's native privacy machinery. The review is
   right that this fails the stated requirement; the intent does not excuse the
   gap, but the fix is either (a) a membership-proof instruction in the guest,
-  or (b) a much more rigorous written justification — not a coding slip.
+  or (b) a much more rigorous written justification, not a coding slip.
 
 - **"The distributor can link claims."** True as a factual matter, and the
   acknowledgment's original framing overstated it. The distributor authors the
   enrollment files and the mints, so it holds the `D_i`↔recipient mapping and
   can observe every claim. **However**, LP-0003 does *not* require the
-  distributor to be blind — the prize's stated privacy property is that an
+  distributor to be blind, the prize's stated privacy property is that an
   **on-chain observer** cannot link a claim to an eligible address (which this
   design does provide: no enrollment data or `D_i`↔recipient mapping ever
   appears on-chain, and claims are shielded transfers), and the prize
@@ -79,7 +79,7 @@ stated precisely rather than as flat admissions.
   trade-off space. The genuine failure is that this distributor-side view is
   **not documented**, when the prize explicitly requires documenting "what the
   distributor learns." The fix is a written threat model stating the
-  distributor trust assumption precisely — not a redesign, and not "documenting
+  distributor trust assumption precisely, not a redesign, and not "documenting
   it away" (that phrasing in the original draft was wrong: documenting a
   required fact is not dodging it).
 
@@ -110,8 +110,8 @@ them so that we neither over- nor under-concede.
 
 - **`logos-airdrop-module` "does not exist."** More precisely: the directory
   *exists locally as an empty scaffold* but contains zero files and is not in
-  the committed tree. The reviewer's operative claim — that the README's
-  module reference is absent from the deliverable — is correct.
+  the committed tree. The reviewer's operative claim, that the README's
+  module reference is absent from the deliverable, is correct.
 
 - **"0 issues on the repo."** Confirmed as factually true at review time; this
   is noted here only because it is an operational gap we control and can fix,
@@ -126,7 +126,7 @@ them so that we neither over- nor under-concede.
 
 ## 5. Root-cause reflection (why these gaps exist)
 
-Honest causes, in order of weight — none of these are excuses, but naming them
+Honest causes, in order of weight, none of these are excuses, but naming them
 is what makes the next plan realistic:
 
 1. **Effort went to the hard technical core first.** The contracting, Merkle
@@ -137,7 +137,7 @@ is what makes the next plan realistic:
 2. **No reviewer-facing evidence pipeline.** Because everything ran against a
    local dev sequencer with mock proofs (`RISC0_DEV_MODE=1`), there was never
    a natural artifact trail (testnet program IDs, claim tx hashes, receipts).
-   Building the evidence is therefore not just "running the demo" — it requires
+   Building the evidence is therefore not just "running the demo", it requires
    a proof-enabled path that was not exercised.
 
 3. **Documentation was written to explain the design, not to satisfy a
@@ -159,8 +159,8 @@ is what makes the next plan realistic:
 
 - It does **not** propose the remediation plan. Fixing comes next, after this
   acknowledgment is committed.
-- It does **not** re-litigate the scorecard math. The categorical verdict —
-  DOES NOT PASS — is accepted.
+- It does **not** re-litigate the scorecard math. The categorical verdict ,
+  DOES NOT PASS, is accepted.
 - It does **not** make promises. Where this document says "we can fix X," that
   is a statement of feasibility, not a commitment with a date.
 
@@ -172,4 +172,4 @@ To the best of the author's knowledge, every "Confirmed" claim in §2 and every
 "nuance" claim in §3 was re-verified against the committed tree at the time of
 writing. Where the evidence contradicts a review detail (§4), it is recorded
 with the same weight as the concessions, because an acknowledgment that only
-concedes is not rigorous — it is flattery in the other direction.
+concedes is not rigorous, it is flattery in the other direction.

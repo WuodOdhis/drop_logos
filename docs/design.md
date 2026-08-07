@@ -1,4 +1,4 @@
-# Private Airdrop on LEZ — Design
+# Private Airdrop on LEZ: Design
 
 Prize LP-0003 (airdrop/allowlist). This document records the design decisions,
 the exact mechanism used, and the assumptions that shape the implementation.
@@ -17,8 +17,8 @@ A distributor wants to give tokens to a hidden set of recipients:
 
 The airdrop program commits to the eligibility set on chain via a **merkle
 root** over `H(D_i)` for each recipient, where `D_i` is a private account the
-recipient generated during enrollment. The program stores this root — plus the
-token definition, totals, distributor authority, and commit timestamp — in a
+recipient generated during enrollment. The program stores this root: plus the
+token definition, totals, distributor authority, and commit timestamp: in a
 PDA `["distribution", distribution_id]`.
 
 **Claiming does not touch the airdrop program.** Instead:
@@ -26,7 +26,7 @@ PDA `["distribution", distribution_id]`.
 - `airdrop_fund` (distributor): mints `amount_i` into `D_i` using the token
   program's `Mint` with a **private foreign account** recipient
   (`send_mint_transaction_private_foreign_account`). The distributor needs no
-  secret key for `D_i` — only `(npk, vpk, identifier)` — which is exactly what
+  secret key for `D_i`: only `(npk, vpk, identifier)`: which is exactly what
   the recipient's enrollment file publishes.
 - `airdrop_claim` (recipient): spends `D_i` with the token program's
   `Transfer` between two **private owned accounts**
@@ -42,7 +42,7 @@ private transfer inside the airdrop program. Consequences:
   compiles to a small ELF and stays far under the sequencer's session/cycle and
   per-tx size limits.
 - The merkle root is an on-chain **commitment to the eligibility set**, and the
-  `airdrop_status` bin re-verifies it from the enrollment files — but the
+  `airdrop_status` bin re-verifies it from the enrollment files: but the
   program itself does not gate claims on merkle proofs. Eligibility is enforced
   by the distributor's mint (only enrolled recipients get funded), and
   double-claim is enforced by the nullifier set.
@@ -105,13 +105,13 @@ distribution: AccountWithMetadata,
 SPEL derives the PDA as `AccountId::for_public_pda(program_id, PdaSeed::new(seed))`
 where `seed = SHA-256("distribution" zero-padded || u64_le(distribution_id))`
 (`spel-framework-core/src/pda.rs`). The host mirrors this exactly in
-`airdrop-core::distribution_seed` — both sides are pinned to the same SHA-256
+`airdrop-core::distribution_seed`: both sides are pinned to the same SHA-256
 combining rule, so host-computed and guest-claimed PDAs match.
 
 ## 5. Eligibility merkle tree
 
 - Depth 32 (`DEFAULT_TREE_DEPTH`), Poseidon-BN254 (`rust-poseidon-bn254-pure`
-  at rev `49e1042` — the same crate/rev the LEZ guest pins, so host and guest
+  at rev `49e1042`: the same crate/rev the LEZ guest pins, so host and guest
   hashing are bit-identical).
 - Leaf `i` = `H(D_i)`; the root is committed on chain.
 - `SparseMerkleTree` stores only modified nodes; unmodified subtrees use cached
@@ -119,17 +119,17 @@ combining rule, so host-computed and guest-claimed PDAs match.
 
 ## 6. Funding / claiming mechanics (verified against wallet + token sources)
 
-- **Fund** — `Token::send_mint_transaction_private_foreign_account(def, npk,
+- **Fund**: `Token::send_mint_transaction_private_foreign_account(def, npk,
   vpk, identifier, amount)`: a privacy-preserving `Mint` whose recipient is
   `AccountIdentity::PrivateForeign`. The definition account is a wallet private
   account (minting is authorized because the definition account is authorized),
   so no per-recipient distributor key is needed. The distributor's wallet can't
   decrypt `D_i`, and doesn't need to.
-- **Claim** — `Token::send_transfer_transaction_private_owned_account(D_i,
+- **Claim**: `Token::send_transfer_transaction_private_owned_account(D_i,
   main, amount)`: a privacy-preserving `Transfer` between two owned accounts.
   The wallet decrypts both outputs after the block seals
   (`sync_private_accounts_with_tx` → `decode_insert_privacy_preserving_transaction_results`).
-- **Double claim** — spending `D_i` publishes its nullifier; a second spend of
+- **Double claim**: spending `D_i` publishes its nullifier; a second spend of
   the same note is rejected by the sequencer with a nullifier/spent error
   (asserted in `airdrop_claim`).
 
@@ -150,7 +150,7 @@ combining rule, so host-computed and guest-claimed PDAs match.
   verifies the on-chain root against the enrollment files but cannot force the
   distributor to fund every eligible recipient (that would require either a
   per-recipient claim-with-proof instruction in the program, or a public
-  funding list — both intentionally out of scope for this prize submission).
+  funding list: both intentionally out of scope for this prize submission).
 - **Freeze** is a kill-switch for the distribution, not a permission system for
   claims.
 

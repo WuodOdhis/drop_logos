@@ -17,7 +17,7 @@ so a fresh build is not at the mercy of upstream drift.
 ## Guest-side (SPEL macro semantics)
 
 - `#[account(init, pda = [literal("distribution"), arg("distribution_id")])]`
-  — `literal` is accepted as an alias for `const`; `arg` derives the seed from
+ : `literal` is accepted as an alias for `const`; `arg` derives the seed from
   the instruction argument (`spel-framework-macros/src/lib.rs`).
 - PDA seed combining is `SHA-256(seed1 || seed2 || ...)`; strings are
   zero-padded to 32 bytes; `u64` is little-endian in the first 8 bytes
@@ -32,12 +32,12 @@ so a fresh build is not at the mercy of upstream drift.
 ## Wallet / token program
 
 - `Token::send_new_definition_private_owned_definiton_and_supply(def, supply,
-  name, total_supply)` — creates a private fungible definition + supply
+  name, total_supply)`: creates a private fungible definition + supply
   (`lez/wallet/src/program_facades/token.rs:95`).
 - `Token::send_mint_transaction_private_foreign_account(def, npk, vpk,
-  identifier, amount)` — `Mint` to `AccountIdentity::PrivateForeign`
+  identifier, amount)`: `Mint` to `AccountIdentity::PrivateForeign`
   (`token.rs:498`).
-- `Token::send_transfer_transaction_private_owned_account(from, to, amount)` —
+- `Token::send_transfer_transaction_private_owned_account(from, to, amount)`:
   `Transfer` between two owned accounts (`token.rs:149`).
 - Wallet decodes/inserts private outputs automatically
   (`sync_private_accounts_with_tx` → `decode_insert_privacy_preserving_transaction_results`

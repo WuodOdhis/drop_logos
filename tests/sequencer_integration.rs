@@ -2,8 +2,8 @@
 //!
 //! This is the real E2E check the assessment asked for: it launches the
 //! standalone LEZ sequencer itself (on an ephemeral port, with a fresh temp
-//! data dir), then drives the full airdrop flow — enroll → deploy → fund →
-//! claim → double-claim — through the actual CLI binaries and asserts the same
+//! data dir), then drives the full airdrop flow (enroll, deploy, fund, claim,
+//! double-claim) through the actual CLI binaries and asserts the same
 //! invariants the demo asserts.
 //!
 //! Prerequisites (see `scripts/run_integration_tests.sh`):

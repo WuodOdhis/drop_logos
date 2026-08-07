@@ -1,4 +1,4 @@
-# Privacy Model / Threat Model — LP-0003 Private Airdrop
+# Privacy Model / Threat Model: LP-0003 Private Airdrop
 
 Status: formal privacy write-up for the LP-0003 submission. This document is
 self-contained: an evaluator should be able to read it alone and answer every
@@ -15,15 +15,15 @@ word "unlinkable" never appears without a definition.
 
 The system has three participant roles plus the platform:
 
-- **Recipient** — holds a wallet; during enrollment generates two private
+- **Recipient**: holds a wallet; during enrollment generates two private
   accounts: `D_i` (the hidden allocation account) and `main_i` (their personal
   shielded claim-destination account). Writes an enrollment file
   (`Enrollment`, JSON) and hands it to the distributor **off-chain**.
-- **Distributor** — collects enrollment files, commits an eligibility
+- **Distributor**: collects enrollment files, commits an eligibility
   **merkle root** to chain, mints each `amount_i` into `D_i`, and can freeze.
-- **Sequencer / chain** — the LEZ node that orders transactions, executes
+- **Sequencer / chain**: the LEZ node that orders transactions, executes
   programs, maintains the nullifier set, and publishes all blocks.
-- **Observer** — any party who reads the chain but participates in neither role.
+- **Observer**: any party who reads the chain but participates in neither role.
 
 The on-chain footprint is small and fixed:
 
@@ -46,7 +46,7 @@ Nothing else about recipients or amounts is written to chain.
 
 ## 2. Adversaries
 
-### A1 — Chain observer
+### A1: Chain observer
 
 **Capabilities.** Full read access to all blocks, transactions, accounts,
 program state, and the nullifier set, from genesis onward. Passive; does not
@@ -55,7 +55,7 @@ hold any wallet, enrollment file, or view key.
 **Goal.** Recover which real-world recipient received what amount, or link a
 recipient to a specific claim.
 
-### A2 — Distributor
+### A2: Distributor
 
 **Capabilities.** Everything an observer knows, **plus**: the full set of
 enrollment files (name ↔ `D_i` ↔ `amount_i` ↔ `main_i` ↔ keys), its own mint
@@ -64,7 +64,7 @@ records (which `D_i` was funded with what), and the ability to freeze.
 **Goal.** Determine who claimed what and when. (This adversary is a *trusted
 party by design*; see §4.)
 
-### A3 — Outside attacker
+### A3: Outside attacker
 
 **Capabilities.** Network access (can send/reorder transactions, front-run),
 and can act as a chain observer. Does **not** hold enrollment files or view
@@ -73,7 +73,7 @@ keys, and is not the distributor.
 **Goals.** (a) Front-run a claim to steal or block it; (b) exclude a recipient
 (censor their claim); (c) learn eligibility status of a victim.
 
-### A4 — Other recipient
+### A4: Other recipient
 
 **Capabilities.** Owns their own wallet + enrollment file; acts as an observer
 otherwise.
@@ -85,7 +85,7 @@ otherwise.
 ## 3. Stage-by-stage "who learns what"
 
 Legend: **O** = observer, **D** = distributor, **R** = recipients other than
-the one acting, **—** = nothing.
+the one acting, **none** = nothing.
 
 | Stage | O learns | D learns | R learns |
 |---|---|---|---|
@@ -115,7 +115,7 @@ obtains enrollment data* (see §6 residual leakage).
 This is not a defect. LP-0003 scopes claim privacy to on-chain observers and
 explicitly permits distributor knowledge as a trade-off axis. The distributor
 is exactly as powerful as the party that selected the recipients and minted to
-them — that is the point where identity information is *necessarily* revealed,
+them: that is the point where identity information is *necessarily* revealed,
 by design, to the one party that already holds it.
 
 Consequences stated plainly:
@@ -125,8 +125,8 @@ Consequences stated plainly:
 - A malicious distributor can mint to whomever it wants and can omit a
   recipient; `airdrop_status` detects a *root* mismatch but cannot force
   funding of every eligible recipient (design.md §7).
-- The distributor holds the **viewing public keys** (`vpk`, `npk`) of `D_i` —
-  public keys only; it cannot decrypt `D_i`'s notes without the viewing secret
+- The distributor holds the **viewing public keys** (`vpk`, `npk`) of `D_i`
+  (public keys only); it cannot decrypt `D_i`'s notes without the viewing secret
   key, and does not need to in order to fund. It can, however, observe the
   nullifier activity of the accounts it already knows about.
 
@@ -141,7 +141,7 @@ Consequences stated plainly:
 its own knowledge (no enrollment files, no view keys, no off-chain side
 channels), the observer's a-posteriori assignment of the claim to any
 particular real-world recipient is no better than random over the eligible
-set — i.e. the observer cannot determine which person claimed, which `D_i`
+set: i.e. the observer cannot determine which person claimed, which `D_i`
 belongs to whom, nor the amount claimed.
 
 **What satisfies it in this design.** The observer never sees `name`, never
@@ -152,12 +152,12 @@ have). The nullifier set proves *spent* but not *who spent*.
 
 **Honest caveat.** Unlinkability is:
 
-- *not* anonymity in a small set — the observer sees the timing and count of
+- *not* anonymity in a small set: the observer sees the timing and count of
   claims and the public `num_eligible`; if a distribution has one recipient,
   that recipient is trivially identified;
-- *not* timing-safe — an observer correlating claim tx times with off-chain
+- *not* timing-safe: an observer correlating claim tx times with off-chain
   knowledge (e.g., who was told "claim now") can narrow candidates;
-- *revocable if enrollment data leaks* — the moment an enrollment file reaches
+- *revocable if enrollment data leaks*: the moment an enrollment file reaches
   an observer, that observer knows `D_i`'s account id and `main_i`, and can
   retroactively attribute the corresponding claim (the distributor-knowledge
   asymmetry from §6).
@@ -186,7 +186,7 @@ if the observer cannot recover `amount_i` from chain data.
 **What satisfies it.** Mint/transfer amounts live inside shielded, encrypted
 note outputs that the observer cannot decrypt. `total_allocation` is public;
 if all allocations are equal the observer infers the (equal) unit amount
-from the public total and `num_eligible` — a residual leakage (see §6).
+from the public total and `num_eligible`: a residual leakage (see §6).
 
 ---
 
@@ -208,7 +208,7 @@ visible to **A1**, and some to everyone:
    the "distributor-learns-everything" property in §4 is not leakage but a
    stated trust assumption. If enrollment files leak (compromise, poor
    handling), the affected recipients' claims become attributable by anyone
-   holding the file — including retroactively.
+   holding the file: including retroactively.
 5. **No anonymous channel for the claim itself.** The claim tx is broadcast
    from the recipient's IP; a network-level observer (or the sequencer) sees
    that a claim happened from a given endpoint. This is out of scope for

@@ -1,11 +1,11 @@
-# Remediation Plan — LP-0003 (Private Allowlist / Airdrop Distributor)
+# Remediation Plan: LP-0003 (Private Allowlist / Airdrop Distributor)
 
-Status: **PLAN** — written after `ASSESSMENT_ACKNOWLEDGEMENT.md`, before any
+Status: **PLAN**: written after `ASSESSMENT_ACKNOWLEDGEMENT.md`, before any
 fix is implemented.
 
 Goal: turn the current "works locally, fails the rubric" state into a
 submission that satisfies the LP-0003 success criteria and is honestly
-verifiable — not a facade. Each item below maps to a specific prize
+verifiable: not a facade. Each item below maps to a specific prize
 requirement and a specific finding from the assessment, is ordered by
 dependency (not by ease), and ends with a definition of done.
 
@@ -41,7 +41,7 @@ The two anchor facts that shape the whole plan:
 
 ---
 
-## Item 1 — LICENSE files + root license metadata
+## Item 1: LICENSE files + root license metadata
 
 **Prize req:** "Public repository... under MIT or Apache-2.0."
 **Assessment finding:** no `LICENSE*`; root `Cargo.toml` has no `license` field.
@@ -59,7 +59,7 @@ The two anchor facts that shape the whole plan:
 
 ---
 
-## Item 2 — `rust-toolchain.toml` + risc0 toolchain pin
+## Item 2: `rust-toolchain.toml` + risc0 toolchain pin
 
 **Prize req:** reproducible build (implied by "evaluators clone and run");
 `verification.md` already *references* a `rust-toolchain.toml` that isn't in the repo.
@@ -76,7 +76,7 @@ The two anchor facts that shape the whole plan:
 2. Document the risc0 guest toolchain (`r0.1.88.0` per `verification.md`) in
    `methods/guest/README.md` or the root README, including `rzup install`.
 3. Note: the guest has no custom release profile (see
-   `methods/guest/Cargo.toml:5-8`) — the doc must state that this is load-bearing
+   `methods/guest/Cargo.toml:5-8`): the doc must state that this is load-bearing
    for the cycle budget.
 
 **DoD:** fresh clone on a clean machine selects 1.94.0 automatically; guest toolchain documented.
@@ -85,7 +85,7 @@ The two anchor facts that shape the whole plan:
 
 ---
 
-## Item 3 — CI workflow (tests + clippy + build)
+## Item 3: CI workflow (tests + clippy + build)
 
 **Prize req:** "CI must be green on the default branch"; "end-to-end
 integration tests run against a LEZ sequencer (standalone mode) and are
@@ -97,7 +97,7 @@ included in CI."
    - **host:** `cargo test --manifest-path Cargo.toml` + `cargo clippy`
      (with `RUSTC_BOOTSTRAP=1` as documented).
    - **guest:** `cargo test --manifest-path methods/guest/Cargo.toml`
-     (host-side unit tests only — no risc0 toolchain needed to *compile* tests
+     (host-side unit tests only: no risc0 toolchain needed to *compile* tests
      on the host is NOT assumed; verify whether guest tests need the target).
    - **check:** `cargo fmt --check` if formatting is currently clean, else add
      a `rustfmt.toml` normalization step first.
@@ -113,7 +113,7 @@ included in CI."
 
 ---
 
-## Item 4 — Sequencer-backed integration tests
+## Item 4: Sequencer-backed integration tests
 
 **Prize req:** "End-to-end integration tests run against a LEZ sequencer
 (standalone mode) and are included in CI."
@@ -137,7 +137,7 @@ the zkVM or a sequencer."
 
 ---
 
-## Item 5 — Deterministic error codes (guest)
+## Item 5: Deterministic error codes (guest)
 
 **Prize req:** "The verifier program returns deterministic, documented error
 codes for all invalid-proof and double-claim scenarios."
@@ -154,29 +154,29 @@ no error enum.
    handlers, since SPEL/LEZ surfaces guest panics as
    `TransactionBuildError(ProgramProveFailed(...))` (seen in
    `airdrop_claim.rs` double-claim rejection). Confirm the error path actually
-   propagates the code on-chain (depends on SPEL macros — verify first).
+   propagates the code on-chain (depends on SPEL macros: verify first).
 4. Update the CLI bins to print the code, not just the panic string.
 
 **DoD:** no bare `assert!` remains in handlers.rs; every failure mode has a
 documented code; `docs/errors.md` exists.
 
 **Effort:** ~2-4 h. (Risk: SPEL may force panics; if so, document the mapping
-of panic strings to codes in the host layer instead — but verify first.)
+of panic strings to codes in the host layer instead: but verify first.)
 
 ---
 
-## Item 6 — Formal privacy model / threat model write-up
+## Item 6: Formal privacy model / threat model write-up
 
 **Prize req:** "documents its full privacy model: what on-chain observers
 learn, what the distributor learns, at which points... identity information is
 revealed or withheld, and where trade-offs or residual leakage remain. Claims
-of privacy must be precise — 'unlinkable' must be defined relative to a stated
+of privacy must be precise: 'unlinkable' must be defined relative to a stated
 threat model."
 **Assessment finding:** §7 is a short bullet list; no adversary definitions;
 "unlinkable" never defined; distributor view unstated; no trusted-setup
 statement.
 
-**Work** — this is the documentation item that most needs care, so it gets its
+**Work**: this is the documentation item that most needs care, so it gets its
 own phase rather than being bundled:
 1. Write `docs/privacy-model.md` with, at minimum:
    - **Adversary definitions:** observer (reads chain), distributor (holds
@@ -184,7 +184,7 @@ own phase rather than being bundled:
      (targeting/excluding/front-running), with explicit capabilities per
      adversary.
    - **Stage-by-stage "who learns what" table:** enroll, deploy/commit, fund,
-     claim, post-claim — for each of observer / distributor / other recipients.
+     claim, post-claim: for each of observer / distributor / other recipients.
    - **Explicit distributor trust statement:** the distributor can link every
      `D_i` to a recipient and observe each claim; this is a stated trust
      assumption and a valid point on the trade-off axis the prize names.
@@ -206,7 +206,7 @@ own phase rather than being bundled:
 
 ---
 
-## Item 7 — README + integration guide
+## Item 7: README + integration guide
 
 **Prize req:** "README documents end-to-end usage: deployment steps, program
 addresses, and step-by-step instructions for interacting with the program via
@@ -216,12 +216,12 @@ integration guide.
 
 **Work**
 1. Rewrite README "Deployment" section to show the real program ID(s) once
-   testnet deployments exist (Item 11) — do NOT hardcode placeholder IDs.
+   testnet deployments exist (Item 11): do NOT hardcode placeholder IDs.
 2. Add `docs/integration-guide.md`: how a third-party LEZ module uses the
    airdrop program (SDK surface of `airdrop-core` + the host `client.rs`
    helpers), a minimal code example, and the exact CLI sequences.
 3. Fix the phantom `logos-airdrop-module/` reference in the README layout
-   block (`README.md:50`) — either implement it (Item 14) or remove the line.
+   block (`README.md:50`): either implement it (Item 14) or remove the line.
    A stub in the layout with no content is a reproducibility defect.
 
 **DoD:** README + integration guide are internally consistent and match the
@@ -231,14 +231,14 @@ actual repo tree.
 
 ---
 
-## Item 8 — FURPS self-assessment
+## Item 8: FURPS self-assessment
 
 **Prize req:** "FURPS self-assessment as part of the solution."
 **Assessment finding:** absent.
 
 **Work:** add `docs/furps.md` following the LP-0000 solution template's FURPS
-structure — Functionality, Usability, Reliability, Performance, Supportability
-— each scored honestly with evidence pointers (this repo's own docs + real
+structure: Functionality, Usability, Reliability, Performance, Supportability
+, each scored honestly with evidence pointers (this repo's own docs + real
 benchmark numbers once Item 10 lands).
 
 **DoD:** document exists and is cross-referenced from the README.
@@ -247,7 +247,7 @@ benchmark numbers once Item 10 lands).
 
 ---
 
-## Item 9 — Benchmarks: CU costs + proof generation time
+## Item 9: Benchmarks: CU costs + proof generation time
 
 **Prize req:** "Document the compute unit (CU) cost of each on-chain operation
 on LEZ devnet/testnet." + "Proof generation time and on-chain verification
@@ -268,14 +268,14 @@ compute unit benchmarks."
 
 **DoD:** numbers exist, were produced by real runs, and are reproducible via a
 committed script. (Risk: CU accounting API may not expose per-instruction
-numbers on the standalone sequencer — if so, record what IS exposed and say so,
+numbers on the standalone sequencer: if so, record what IS exposed and say so,
 rather than inventing units.)
 
 **Effort:** ~2-4 h (after Item 10 makes real proofs runnable).
 
 ---
 
-## Item 10 — Real proofs: `RISC0_DEV_MODE=0` path
+## Item 10: Real proofs: `RISC0_DEV_MODE=0` path
 
 **Prize req:** "A reproducible end-to-end demo script is provided and works
 against a real local sequencer with `RISC0_DEV_MODE=0`."
@@ -287,7 +287,7 @@ OOM'd the prover (the original `rx len failed` episode). Do this first, before
 any evidence generation:
 
 **Work**
-1. Standalone proof probe exists at `/tmp/opencode/probe` (risc0 3.0.5) —
+1. Standalone proof probe exists at `/tmp/opencode/probe` (risc0 3.0.5) ,
    resurrect and extend it to time a single proof on the actual guest ELF.
 2. Measure: can a claim proof complete on this machine? If not:
    - Option A: raise swap / use a bigger runner just for proof generation.
@@ -305,11 +305,11 @@ any evidence generation:
 sequencer, and the terminal shows real proof generation. This is the gating
 item for Items 9, 11, 12, 13.
 
-**Effort:** 4-12 h (unpredictable — the OOM history is the risk).
+**Effort:** 4-12 h (unpredictable: the OOM history is the risk).
 
 ---
 
-## Item 11 — Testnet deployments + evidence
+## Item 11: Testnet deployments + evidence
 
 **Prize req:** "At least 2 distinct distributions are deployed on LEZ testnet,
 with a combined total of at least 20 unique claims completed across them; the
@@ -319,13 +319,13 @@ deployed on LEZ testnet with a verified program ID."
 
 **Work**
 1. Obtain/configure testnet credentials and RPC endpoint (may require access
-   we don't currently have — flag to the team if blocked).
+   we don't currently have: flag to the team if blocked).
 2. Deploy the airdrop + token programs on testnet; record the verified program
    IDs and deployment tx hashes in `docs/testnet.md` and the README.
 3. Run **distribution #1** (e.g., 10 recipients) and **distribution #2**
    (e.g., 10 different recipients) with all 20+ claims via the CLI.
 4. Commit evidence: per-claim tx hashes, a claims log, and the deployment
-   manifest — as JSON files under `evidence/`.
+   manifest: as JSON files under `evidence/`.
 5. Make it reproducible: a `scripts/testnet_run.sh` that takes a recipient
    list and emits the same evidence structure.
 
@@ -336,14 +336,14 @@ unique claim tx hashes in the repo, reproducible via a committed script.
 
 ---
 
-## Item 12 — GitHub issues for Logos tech problems
+## Item 12: GitHub issues for Logos tech problems
 
 **Prize req:** "GitHub issues open for any problem encountered with Logos
 technology."
 **Assessment finding:** 0 issues.
 
 **Work:** open issues on the relevant Logos repos (or this repo, if the
-problems were local) for the genuinely-encountered upstream friction we hit —
+problems were local) for the genuinely-encountered upstream friction we hit ,
 e.g., the OOM/`rx len failed` behavior, the `RISC0_DEV_MODE` verifier symmetry,
 the "Commitment already seen" multi-mint failure mode, and the `NSSA_` vs
 `LEE_` env-var mismatch. Link them from `docs/verification.md`.
@@ -354,7 +354,7 @@ the "Commitment already seen" multi-mint failure mode, and the `NSSA_` vs
 
 ---
 
-## Item 13 — Video demo
+## Item 13: Video demo
 
 **Prize req:** "End-to-end demo video... builder narrates... demonstrates a
 private claim from a shielded account... recording must show terminal output
@@ -375,7 +375,7 @@ private claim from a shielded account... recording must show terminal output
 
 ---
 
-## Item 14 — Basecamp app GUI (and the phantom module)
+## Item 14: Basecamp app GUI (and the phantom module)
 
 **Prize req:** "Provide a Logos Basecamp app GUI with local build instructions,
 downloadable assets, and loadable in Logos app (Basecamp)."
@@ -383,15 +383,15 @@ downloadable assets, and loadable in Logos app (Basecamp)."
 README reference is a phantom.
 
 **Decision point (must be resolved before starting):**
-- Option A — **build the QML module** (the prize explicitly requires a GUI;
+- Option A: **build the QML module** (the prize explicitly requires a GUI;
   this is a real P0). Scaffold a Logos Basecamp module (Rust provider + QML
   UI) wrapping the CLI/`airdrop-core` logic, with build instructions.
-- Option B — **drop the claim** and remove the phantom README line. This keeps
+- Option B: **drop the claim** and remove the phantom README line. This keeps
   the repo honest but guarantees that requirement fails.
 
 This plan assumes Option A (the requirement is explicit). If effort becomes
 unsustainable, Option B is the fallback and must be paired with an honest note
-in FURPS/README — never an empty directory.
+in FURPS/README: never an empty directory.
 
 **Work:** follow the Logos Basecamp module template (metadata, provider,
 QML views for enroll/claim/status), add local build instructions and a
@@ -404,7 +404,7 @@ a populated (non-empty) `logos-airdrop-module/` directory.
 
 ---
 
-## Item 15 — ZK eligibility proof: decide, then do one
+## Item 15: ZK eligibility proof: decide, then do one
 
 **Prize req (scope section):** "ZK circuit(s) for eligibility and
 claim-uniqueness proofs, targeting the Risc0 proving stack."
@@ -412,16 +412,16 @@ claim-uniqueness proofs, targeting the Risc0 proving stack."
 is used off-chain only. The review calls this the biggest architectural risk.
 
 **Decision point.** Two defensible resolutions; pick one and document it:
-- **Option A — add a membership-proof claim instruction.** Recipients submit a
+- **Option A: add a membership-proof claim instruction.** Recipients submit a
   claim tx containing a Merkle inclusion proof (for their `D_i` leaf) verified
   inside the guest against the committed root, plus a nullifier. This removes
   the "distributor mints eligibility" trust for *funding correctness* (not for
   recipient-privacy), aligns with the scope line, but grows the guest and risks
   the cycle budget. Effort: 8-16 h + proof-size work.
-- **Option B — rigorous justification + tightened scope claim.** Argue (as
+- **Option B: rigorous justification + tightened scope claim.** Argue (as
   `design.md` §2 does) that eligibility is enforced by the distributor's mint,
   that claims are native LEZ transfers, and that the *claim-uniqueness* proof
-  is LEZ's nullifier set — and document why this satisfies the prize's
+  is LEZ's nullifier set: and document why this satisfies the prize's
   *functionality* criteria while noting the scope-line deviation honestly.
   Effort: 2-3 h, but leaves the "biggest risk" partially open.
 
@@ -489,5 +489,5 @@ Cross-checked against LP-0003 success criteria:
 Honest note on completeness: items 1-8 are fully within our control and can be
 completed to standard. Items 10-13 depend on either real-proof reliability on
 this hardware or testnet access; if either is blocked, the submission still
-cannot pass the hard gates regardless of how well everything else is done —
+cannot pass the hard gates regardless of how well everything else is done ,
 that is why Item 10 is scheduled first.
