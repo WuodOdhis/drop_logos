@@ -29,7 +29,6 @@ const STATUS: &str = env!("CARGO_BIN_EXE_airdrop_status");
 
 const DEFAULT_SEQUENCER_BIN: &str =
     "/home/badman/.cache/logos-lez-rln/sequencer-src/target/release/sequencer_service";
-const DEFAULT_SEQUENCER_CONFIG: &str = "/home/badman/.cache/logos-lez-rln/sequencer-src/lez/sequencer/service/configs/debug/sequencer_config.json";
 
 fn sequencer_bin() -> PathBuf {
     std::env::var("LEZ_SEQUENCER_BIN")
@@ -37,10 +36,22 @@ fn sequencer_bin() -> PathBuf {
         .unwrap_or_else(|_| PathBuf::from(DEFAULT_SEQUENCER_BIN))
 }
 
+/// Derive the standalone config from the bin's source root
+/// (`<src>/target/release/sequencer_service` -> `<src>/lez/sequencer/service/
+/// configs/debug/sequencer_config.json`), overridable via LEZ_SEQUENCER_CONFIG.
 fn sequencer_config() -> PathBuf {
-    std::env::var("LEZ_SEQUENCER_CONFIG")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from(DEFAULT_SEQUENCER_CONFIG))
+    if let Ok(cfg) = std::env::var("LEZ_SEQUENCER_CONFIG") {
+        return PathBuf::from(cfg);
+    }
+    // release -> target -> <src-root>
+    sequencer_bin()
+        .parent()
+        .and_then(|p| p.parent())
+        .and_then(|p| p.parent())
+        .map(|src| src.join("lez/sequencer/service/configs/debug/sequencer_config.json"))
+        .unwrap_or_else(|| {
+            panic!("cannot derive sequencer config from bin; set LEZ_SEQUENCER_CONFIG")
+        })
 }
 
 /// Wait until the sequencer RPC health check succeeds.
