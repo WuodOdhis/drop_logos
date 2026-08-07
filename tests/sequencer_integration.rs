@@ -29,8 +29,7 @@ const STATUS: &str = env!("CARGO_BIN_EXE_airdrop_status");
 
 const DEFAULT_SEQUENCER_BIN: &str =
     "/home/badman/.cache/logos-lez-rln/sequencer-src/target/release/sequencer_service";
-const DEFAULT_SEQUENCER_CONFIG: &str =
-    "/home/badman/.cache/logos-lez-rln/sequencer-src/lez/sequencer/service/configs/debug/sequencer_config.json";
+const DEFAULT_SEQUENCER_CONFIG: &str = "/home/badman/.cache/logos-lez-rln/sequencer-src/lez/sequencer/service/configs/debug/sequencer_config.json";
 
 fn sequencer_bin() -> PathBuf {
     std::env::var("LEZ_SEQUENCER_BIN")
@@ -82,10 +81,7 @@ impl SequencerGuard {
         };
 
         // Fresh, empty data dir so the sequencer creates genesis state from scratch.
-        let data_dir = std::env::temp_dir().join(format!(
-            "airdrop-seqtest-{}",
-            std::process::id()
-        ));
+        let data_dir = std::env::temp_dir().join(format!("airdrop-seqtest-{}", std::process::id()));
         std::fs::create_dir_all(&data_dir).expect("create sequencer data dir");
 
         eprintln!("Starting sequencer {bin:?} on port {port}, data in {data_dir:?}...");
@@ -163,10 +159,8 @@ impl LocalStateGuard {
     fn park() -> Self {
         let local = PathBuf::from(".logos-airdrop");
         if local.exists() {
-            let parked = std::env::temp_dir().join(format!(
-                "airdrop-localstate-parked-{}",
-                std::process::id()
-            ));
+            let parked = std::env::temp_dir()
+                .join(format!("airdrop-localstate-parked-{}", std::process::id()));
             let _ = std::fs::remove_dir_all(&parked);
             std::fs::rename(&local, &parked).expect("move aside local .logos-airdrop");
             Self {
