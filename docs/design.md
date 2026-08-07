@@ -135,6 +135,10 @@ combining rule, so host-computed and guest-claimed PDAs match.
 
 ## 7. Security model / assumptions
 
+> Privacy terminology ("unlinkable", "hidden set", "distributor view") is
+> defined formally, per adversary, in `docs/privacy-model.md`. That document
+> is authoritative for any privacy claim; this section is the short form.
+
 - **Hidden set**: the root is committed; leaves are never published by the
   distributor. The enrollment files are held by the distributor and the
   recipients.
